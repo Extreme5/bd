@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ serie[0] }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+  <h1>{{ serie[0] }}</h1>
+  <div class="episodes">
+    {% for e in episodes %}
+      <label>
+        <input type="checkbox" data-serie="{{ serie_id }}" data-num="{{ e[0] }}" {% if e[1] %}checked{% endif %}>
+        Épisode {{ e[0] }}
+      </label>
+    {% endfor %}
+  </div>
+</body>
+</html>

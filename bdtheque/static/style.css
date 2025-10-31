@@ -1,0 +1,22 @@
+body {
+  font-family: system-ui;
+  margin: 20px;
+  background: #fafafa;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.card {
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  text-align: center;
+  text-decoration: none;
+  color: #222;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.card:hover {
+  background: #eee;
+}
