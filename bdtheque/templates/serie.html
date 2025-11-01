@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Albums de la série "{{ serie }}"</h1>
+<h1 style = "text-align: center;">Albums de la série "{{ serie }}"</h1>
 
 {% if tomes %}
-	<p>Nous possédons {{ tomes|length }} album(s) :</p>
+	<p  style = "text-align: center;">{{ tomes|length|add:"-1" }} albums</p>
     <div class="tomes-grid">
     {% for i in tomes_range %}
       <div class="tome {% if i in tomes %}active{% endif %}" data-num="{{ i }}" style="text-align:center">

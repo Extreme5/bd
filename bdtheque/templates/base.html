@@ -25,10 +25,23 @@
             border-radius: 16px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: transform 0.15s ease, box-shadow 0.2s;
+            /* Ensure a minimum visible size on small screens */
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
         .card:hover {
             transform: translateY(-4px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        /* Card content vertically centered */
+        .card .card-body {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .card-title {
             font-weight: 600;
@@ -55,6 +68,47 @@
         .tome.active {
             background: #0d6efd;
             color: white;
+        }
+        /* Responsive tweaks for small screens */
+        @media (max-width: 576px) {
+            .series-grid {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                min-height: 180px;
+            }
+            .tomes-grid {
+                grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            }
+        }
+
+                
+        /* small popup */
+        .mini-popup {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            background: rgba(13,110,253,0.95);
+            color: #fff;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            z-index: 1050;
+        }
+        /* delete button on cards */
+        .delete-serie-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #dc3545; /* bootstrap danger */
+            padding: 4px;
+        }
+        .delete-serie-btn:hover {
+            color: #b02a37;
         }
     </style>
 

@@ -1,10 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import sqlite3
-from pathlib import Path
+from django import forms
+
+
+class NameForm(forms.Form):
+    your_name = forms.CharField(label="Your name", max_length=100)
 
 
 # Utilitaire : récupère la base de données utilisée par Django (chemin absolu)
@@ -37,8 +40,43 @@ def home(request):
     # fallback minimal si la table est vide
     if not series:
         series = {}
-    print(series)
+    # handle classic POST add (server-side) -> redirect with flag to show popup
+    if request.method == 'POST':
+        new_serie = request.POST.get('serie_name')
+        if new_serie:
+            db_path = get_sqlite_path()
+            try:
+                conn = sqlite3.connect(db_path)
+                cur = conn.cursor()
+                cur.execute("SELECT 1 FROM tomes WHERE serie = ?", (new_serie,))
+                exists = cur.fetchone()
+                if not exists:
+                    cur.execute("INSERT INTO tomes (serie) VALUES (?)", (new_serie,))
+                conn.commit()
+            finally:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            # redirect to avoid double POST and show popup via ?added=1
+            return HttpResponseRedirect(request.path + '?added=1')
+
     return render(request, 'home.html', {"series": series})
+
+
+def add_serie(request):
+    """Endpoint AJAX : ajoute une série côté client et renvoie JSON.
+
+    NOTE: Pour l'instant on n'ajoute pas de ligne dans la table `tomes` (pas de tomes)
+    afin d'éviter d'insérer des lignes incomplètes. Le front-end ajoutera la carte
+    dynamiquement et la persistance pourra être implémentée si vous créez une
+    table `series` dédiée ou modifiez le modèle.
+    """
+    if request.method == 'POST':
+        serie_name = request.POST.get('serie_name') or request.GET.get('serie_name')
+        if serie_name:
+            return JsonResponse({'ok': True, 'serie': serie_name, 'tomes_count': 0})
+    return JsonResponse({'ok': False}, status=400)
 
 def serie(request, serie):
     series = get_series_from_db()
@@ -46,6 +84,24 @@ def serie(request, serie):
     # fournir aussi une séquence 1..50 au template (on ne peut pas appeler range() dans les templates)
     tomes_range = list(range(1, 51))
     return render(request, 'serie.html', {"serie": serie, "tomes": tomes, "tomes_range": tomes_range})
+
+
+def delete_serie(request, serie):
+    """Delete all tomes rows for a serie. Expects POST (AJAX) and returns JSON."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST required'}, status=400)
+    db_path = get_sqlite_path()
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("DELETE FROM tomes WHERE serie = ?", (serie,))
+        conn.commit()
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+    return JsonResponse({'ok': True})
 
 @csrf_exempt
 def toggle_tome(request, serie, num):

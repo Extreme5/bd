@@ -2,20 +2,99 @@
 {% block content %}
 
 <h1 style="text-align:center">Bienvenue dans la BDthèque</h1>
+
 <br>
 
 <div class="series-grid">
-    {% for serie, tomes in series.items %}
-      <div class="card">
-        <div class="card-body text-center">
-          <h5 class="card-title">{{ serie }}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">On a {{ tomes|length }} albums.</h6>
-          <a href="{% url 'serie' serie %}" class="btn btn-outline-primary rounded-pill px-4">
-            Voir les albums
-          </a>
-        </div>
+
+  {% for serie, tomes in series.items %}
+    <div class="card">
+      <button class="delete-serie-btn" data-serie="{{ serie }}" title="Supprimer la série">🗑️</button>
+      <div class="card-body text-center">
+        <h5 class="card-title">{{ serie }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ tomes|length|add:"-1" }} albums</h6>
+        <a href="{% url 'serie' serie %}" class="btn btn-outline-primary rounded-pill px-4">
+          Voir les albums
+        </a>
       </div>
-    {% endfor %}
+    </div>
+  {% endfor %}
+
+  <div class="card">
+    <div class="card-body text-center">
+      <h5 class="card-title">Ajouter une série</h5>
+      <form method = "post" name = "new_serie">
+        {% csrf_token %}
+        <div class="mb-3">
+          <input type="text" class="form-control" name="serie_name" placeholder="Nom de la série" required>
+        </div>
+        <button type="submit" class="btn btn-outline-primary rounded-pill px-4">
+          Ajouter
+        </button>
+    </div>
   </div>
+
+</div>
+
+  <script>
+  // popup helper
+  function showPopup(message) {
+    const el = document.createElement('div');
+    el.className = 'mini-popup';
+    el.textContent = message;
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; }, 1500);
+    setTimeout(() => el.remove(), 2200);
+  }
+
+  // read CSRF cookie
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // attach delete handlers
+  document.querySelectorAll('.delete-serie-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const serie = btn.dataset.serie;
+      if (!confirm(`Supprimer la série "${serie}" ?`)) return;
+      const csrftoken = getCookie('csrftoken');
+      try {
+        const res = await fetch(`/bdtheque/delete_serie/${encodeURIComponent(serie)}/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken }
+        });
+        const data = await res.json();
+        if (data.ok) {
+          // remove card
+          const card = btn.closest('.card');
+          if (card) card.remove();
+          showPopup('Série supprimée');
+        } else {
+          showPopup('Erreur suppression');
+        }
+      } catch (err) {
+        console.error(err);
+        showPopup('Erreur réseau');
+      }
+    });
+  });
+
+  // show popup when redirected after add
+  {% if request.GET.added %}
+    document.addEventListener('DOMContentLoaded', () => showPopup('Série ajoutée, actualiser pour voir'));
+  {% endif %}
+
+</script>
 
 {% endblock %}
