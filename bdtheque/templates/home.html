@@ -1,19 +1,21 @@
-<!doctype html>
-<html lang="fr">
+{% extends "base.html" %}
+{% block content %}
 
-{% load static %}
+<h1 style="text-align:center">Bienvenue dans la BDthèque</h1>
+<br>
 
-  <head>
+<div class="series-grid">
+    {% for serie, tomes in series.items %}
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">{{ serie }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">On a {{ tomes|length }} albums.</h6>
+          <a href="{% url 'serie' serie %}" class="btn btn-outline-primary rounded-pill px-4">
+            Voir les albums
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 
-    <title>BDthèque</title>
-	
-	<style type="text/css">
-	</style>
-	
-  </head>
-
-  <body>
-    <h1>Bienvenue dans la BDthèque</h1>
-  </body>
-  
-</html>
+{% endblock %}
