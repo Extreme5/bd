@@ -13,6 +13,14 @@
     {% endfor %}
   </div>
 
+  <br>
+
+  <center>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill px-4">
+      retourner à l'accueil
+    </a>
+  </center>
+
   <script>
     document.querySelectorAll('.tome').forEach(btn => {
       btn.addEventListener('click', async () => {

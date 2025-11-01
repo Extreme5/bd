@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.contrib import messages
 import sqlite3
 from django import forms
 
@@ -36,6 +37,7 @@ def get_series_from_db():
     return series
 
 def home(request):
+    added = False
     series = get_series_from_db()
     # fallback minimal si la table est vide
     if not series:
@@ -52,14 +54,14 @@ def home(request):
                 exists = cur.fetchone()
                 if not exists:
                     cur.execute("INSERT INTO tomes (serie) VALUES (?)", (new_serie,))
+                    added = True
                 conn.commit()
             finally:
-                try:
-                    conn.close()
-                except Exception:
-                    pass
-            # redirect to avoid double POST and show popup via ?added=1
-            return HttpResponseRedirect(request.path + '?added=1')
+                conn.close()
+            if added:
+                # use Django messages to show a one-time popup after redirect
+                messages.success(request, 'Série ajoutée !')
+                return HttpResponseRedirect(request.path)
 
     return render(request, 'home.html', {"series": series})
 
