@@ -60,7 +60,7 @@ def home(request):
                 conn.close()
             if added:
                 # use Django messages to show a one-time popup after redirect
-                messages.success(request, 'Série ajoutée !')
+                messages.success(request, '✔ Série ajoutée !')
                 return HttpResponseRedirect(request.path)
 
     return render(request, 'home.html', {"series": series})
