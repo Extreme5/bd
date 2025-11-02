@@ -13,7 +13,8 @@
       <form method = "post" name = "new_serie">
         {% csrf_token %}
         <div class="mb-3">
-          <input type="text" class="form-control" name="serie_name" placeholder="Nom de la série" required>
+          <input type="text" class="form-control" style="display:block; margin-bottom:7px" name="serie_name" placeholder="Nom de la série" required>
+          <input type="text" class="form-control" name="total" placeholder="Nombre total d'albums dans la série" required>
         </div>
         <button type="submit" class="btn btn-outline-primary rounded-pill px-4">
           Ajouter

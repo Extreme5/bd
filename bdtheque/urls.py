@@ -9,4 +9,5 @@ urlpatterns = [
     path("serie/<str:serie>/", serie, name="serie"),
     path('toggle_tome/<str:serie>/<int:num>', toggle_tome, name='toggle_tome'),
     path('delete_serie/<str:serie>/', delete_serie, name='delete_serie'),
+    path('add_tome/<str:serie>/', add_tome, name='add_tome'),
 ]

@@ -45,6 +45,7 @@ def home(request):
     # handle classic POST add (server-side) -> redirect with flag to show popup
     if request.method == 'POST':
         new_serie = request.POST.get('serie_name')
+        tot = request.POST.get('total')
         if new_serie:
             db_path = get_sqlite_path()
             try:
@@ -54,6 +55,7 @@ def home(request):
                 exists = cur.fetchone()
                 if not exists:
                     cur.execute("INSERT INTO tomes (serie) VALUES (?)", (new_serie,))
+                    cur.execute("INSERT INTO totaux (serie, total) VALUES (?, ?)", (new_serie, tot))
                     added = True
                 conn.commit()
             finally:
@@ -83,8 +85,23 @@ def add_serie(request):
 def serie(request, serie):
     series = get_series_from_db()
     tomes = series.get(serie, [])
-    # fournir aussi une séquence 1..50 au template (on ne peut pas appeler range() dans les templates)
-    tomes_range = list(range(1, 51))
+
+    # fournir aussi une séquence 1..total au template
+    db_path = get_sqlite_path()
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        tomes_range = cur.execute("SELECT total FROM totaux WHERE serie = ?", (serie,)).fetchone()[0]
+        tomes_range = range(1, tomes_range + 1)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+    print("series :", series)
+    print("serie :", serie)
+    print("tomes :", tomes)
+    print("range :", tomes_range)
     return render(request, 'serie.html', {"serie": serie, "tomes": tomes, "tomes_range": tomes_range})
 
 
@@ -97,6 +114,7 @@ def delete_serie(request, serie):
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         cur.execute("DELETE FROM tomes WHERE serie = ?", (serie,))
+        cur.execute("DELETE FROM totaux WHERE serie = ?", (serie,))
         conn.commit()
     finally:
         try:
@@ -104,6 +122,35 @@ def delete_serie(request, serie):
         except Exception:
             pass
     return JsonResponse({'ok': True})
+
+
+def add_tome(request, serie):
+    """AJAX endpoint: increment the total number of tomes for a serie.
+
+    Returns JSON: {'ok': True, 'new_total': int}
+    """
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST required'}, status=400)
+    db_path = get_sqlite_path()
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        # check existing total
+        cur.execute("SELECT total FROM totaux WHERE serie = ?", (serie,))
+        row = cur.fetchone()
+        if row:
+            new_total = row[0] + 1
+            cur.execute("UPDATE totaux SET total = ? WHERE serie = ?", (new_total, serie))
+        else:
+            new_total = 1
+            cur.execute("INSERT INTO totaux (serie, total) VALUES (?, ?)", (serie, new_total))
+        conn.commit()
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+    return JsonResponse({'ok': True, 'new_total': new_total})
 
 @csrf_exempt
 def toggle_tome(request, serie, num):

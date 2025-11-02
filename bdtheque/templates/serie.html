@@ -3,14 +3,15 @@
 
 <h1 style = "text-align: center;">Albums de la série "{{ serie }}"</h1>
 
-{% if tomes %}
-	<p  style = "text-align: center;">{{ tomes|length|add:"-1" }} albums</p>
+    <p  style = "text-align: center;">{{ tomes|length|add:"-1" }} albums</p>
     <div class="tomes-grid">
     {% for i in tomes_range %}
       <div class="tome {% if i in tomes %}active{% endif %}" data-num="{{ i }}" style="text-align:center">
         {{ i }}
       </div>
     {% endfor %}
+      <!-- add button -->
+      <div class="tome add-tome" id="add-tome" style="text-align:center">+</div>
   </div>
 
   <br>
@@ -22,20 +23,83 @@
   </center>
 
   <script>
-    document.querySelectorAll('.tome').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const num = btn.dataset.num;
-        btn.classList.toggle('active');
-        await fetch(`/bdtheque/toggle_tome/{{ serie }}/${num}`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        });
+    // helper to read CSRF cookie
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function showPopup(message) {
+      const el = document.createElement('div');
+      el.className = 'mini-popup';
+      el.textContent = message;
+      document.body.appendChild(el);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; }, 1500);
+      setTimeout(() => el.remove(), 2200);
+    }
+
+    // attach toggle handler to a tome element
+    function attachTomeHandler(el) {
+      el.addEventListener('click', async () => {
+        const num = el.dataset.num;
+        el.classList.toggle('active');
+        try {
+          await fetch(`/bdtheque/toggle_tome/{{ serie }}/${num}`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+          });
+        } catch (err) {
+          console.error(err);
+          showPopup('Erreur réseau');
+        }
       });
+    }
+
+    // initialize handlers for existing tomes
+    document.querySelectorAll('.tome').forEach(el => {
+      if (!el.classList.contains('add-tome')) attachTomeHandler(el);
+    });
+
+    // add-tome handler: call backend to increment total and insert new tile
+    document.getElementById('add-tome').addEventListener('click', async () => {
+      const csrftoken = getCookie('csrftoken');
+      try {
+        const res = await fetch(`/bdtheque/add_tome/{{ serie }}/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken }
+        });
+        const data = await res.json();
+        if (data.ok) {
+          const newNum = data.new_total;
+          // create new tile and insert before add button
+          const addBtn = document.getElementById('add-tome');
+          const tile = document.createElement('div');
+          tile.className = 'tome';
+          tile.dataset.num = newNum;
+          tile.style.textAlign = 'center';
+          tile.textContent = newNum;
+          addBtn.parentNode.insertBefore(tile, addBtn);
+          attachTomeHandler(tile);
+          showPopup('Tome ajouté');
+        } else {
+          showPopup('Erreur ajout tome');
+        }
+      } catch (err) {
+        console.error(err);
+        showPopup('Erreur réseau');
+      }
     });
   </script>
 
-{% else %}
-	<p>Aucun album trouvé pour cette série.</p>
-{% endif %}
 
 {% endblock %}
