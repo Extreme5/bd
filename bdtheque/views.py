@@ -65,7 +65,7 @@ def home(request):
                 messages.success(request, '✔ Série ajoutée !')
                 return HttpResponseRedirect(request.path)
 
-    return render(request, 'home.html', {"series": series})
+    return render(request, 'home.html', {"series": series, "total_albums": sum(len(tomes) for tomes in series.values())})
 
 
 def add_serie(request):
