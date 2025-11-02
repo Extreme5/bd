@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-u4!*k5)hic7p64ew@g8z*6dvm%34&*1@@s970gh!e428#-byhq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['bdtheque.pythonanywhere.com']
+ALLOWED_HOSTS = ['bdtheque.eu.pythonanywhere.com/']
 
 
 # Application definition
