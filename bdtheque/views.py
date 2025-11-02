@@ -29,6 +29,11 @@ def get_series_from_db():
         rows = cur.fetchall()
         for serie, tome in rows:
             series.setdefault(serie, []).append(tome)
+
+        #trier par ordre alphabétique
+        sorted_keys = sorted(series.keys())
+        series = {k: sorted(series[k]) for k in sorted_keys}
+        
     finally:
         try:
             conn.close()
@@ -97,11 +102,6 @@ def serie(request, serie):
     finally:
         conn.close()
 
-
-    print("series :", series)
-    print("serie :", serie)
-    print("tomes :", tomes)
-    print("range :", tomes_range)
     return render(request, 'serie.html', {"serie": serie, "tomes": tomes, "tomes_range": tomes_range})
 
 
