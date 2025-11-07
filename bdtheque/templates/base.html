@@ -17,21 +17,23 @@
         }
         .series-grid {
             display: grid;
-            /* augmenter légèrement la taille minimale pour forcer des cards plus larges */
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, 350px); /* Taille fixe de 350px */
             gap: 1.5rem;
+            justify-content: center; /* Centre les cartes dans l'espace disponible */
+            padding: 0 1rem;
+            width: 100%;
         }
         .card {
+            width: 350px; /* Largeur fixe */
             border: none;
             border-radius: 16px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: transform 0.15s ease, box-shadow 0.2s;
-            /* augmenter la hauteur minimale pour mobile et tablettes */
             min-height: 240px;
             display: flex;
             flex-direction: column;
             position: relative;
-            padding: 1rem; /* espace intérieur pour rendre le contenu plus lisible */
+            padding: 1rem;
         }
         .card:hover {
             transform: translateY(-4px);
@@ -74,16 +76,21 @@
             color: white;
         }
         /* Responsive tweaks for small screens */
-        @media (max-width: 576px) {
+        /* Uniquement pour les petits écrans */
+        @media (max-width: 280px) {
             .series-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+                grid-template-columns: 1fr; /* Force une colonne */
             }
             .card {
-                /* augmenter encore la hauteur minimale sur tout petit écran */
-                min-height: 220px;
-                padding: 1.25rem;
+                width: 100%; /* La carte prend toute la largeur disponible */
             }
+            .card-body {
+                padding: 0.5rem;
+            }
+            .btn {
+                padding: 0.4rem 1rem;
+            }
+        }
             .card .card-body {
                 padding: 0.75rem;
             }

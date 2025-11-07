@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 style="text-align:center">Bienvenue dans la BDthèque</h1>
-
-<br>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem">
+  <h1>Bienvenue dans la BDthèque</h1>
+  <input type="text" 
+         id="searchInput" 
+         class="form-control" 
+         style="width: 200px" 
+         placeholder="Rechercher...">
+</div>
 
 <h3 style="text-align:center">Total : {{ total_albums }} albums</h3>
 
@@ -27,7 +32,7 @@
   </div>
 
   {% for serie, tomes in series.items %}
-    <div class="card">
+    <div class="card" data-serie-name="{{ serie|lower }}">
       <button class="delete-serie-btn" data-serie="{{ serie }}" title="Supprimer la série">🗑️</button>
       <div class="card-body text-center">
         <h5 class="card-title">{{ serie }}</h5>
@@ -102,6 +107,25 @@
         showPopup("{{ message|escapejs }}");
       {% endfor %}
     {% endif %}
+    
+    // Gestion de la recherche
+    const searchInput = document.getElementById('searchInput');
+    let searchQuery = ''; // Variable qui contient le texte de recherche
+    
+    // Fonction pour filtrer les séries
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      
+      // Sélectionne toutes les cartes sauf celle "Ajouter une série"
+      document.querySelectorAll('.card[data-serie-name]').forEach(card => {
+        const serieName = card.dataset.serieName;
+        if (serieName.includes(searchQuery)) {
+          card.style.display = ''; // Affiche la carte si elle correspond
+        } else {
+          card.style.display = 'none'; // Cache la carte si elle ne correspond pas
+        }
+      });
+    });
   });
 
 </script>

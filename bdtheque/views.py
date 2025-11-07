@@ -33,7 +33,6 @@ def get_series_from_db():
         #trier par ordre alphabétique
         sorted_keys = sorted(series.keys())
         series = {k: series[k] for k in sorted_keys}
-        print(series)
         
     finally:
         try:
