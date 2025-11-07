@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem">
-  <h1>Bienvenue dans la BDthèque</h1>
+<h1 style="text-align: center; margin: 1rem;">Bienvenue dans la BDthèque</h1>
+
+<h3 style="text-align:center; clear:right; margin: 2rem">Total : {{ total_albums }} albums</h3>
+
+<div style="display: flex; justify-content: space-between; display: flex; justify-content: center; align-items: center;">
   <input type="text" 
          id="searchInput" 
          class="form-control" 
          style="width: 200px" 
          placeholder="Rechercher...">
 </div>
-
-<h3 style="text-align:center">Total : {{ total_albums }} albums</h3>
 
 <br>
 

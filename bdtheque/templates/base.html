@@ -1,10 +1,6 @@
 <!doctype html>
-<html lang="fr">
-
-{% load static %}
-
-  <head>
-
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BDthèque</title>
 	
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -13,7 +9,12 @@
         body {
             background: #f8f9fa;
             font-family: system-ui;
-            padding: 2rem;
+            padding: 2rem 1rem; /* Réduit les marges latérales */
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem; /* Encore moins de marge sur mobile */
+            }
         }
         .series-grid {
             display: grid;
@@ -90,7 +91,6 @@
             .btn {
                 padding: 0.4rem 1rem;
             }
-        }
             .card .card-body {
                 padding: 0.75rem;
             }
