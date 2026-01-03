@@ -1,3 +1,7 @@
 pydata.py
 db.sqlite3
 settings.py
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
