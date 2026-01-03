@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="max-width:800px; margin:auto">
+  <center>
+  <h1>Winchlist</h1>
+  <p>Pour les boulets : vérfiez dans la BDthèque que les albums ne sont pas déjà achetés</p>
+  </center>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-info">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <textarea name="content" class="form-control" rows="16">{{ content }}</textarea>
+    </div>
+    <center>
+    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+    </center>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,4 +1,5 @@
 <!doctype html>
+{% load static %}
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BDthèque</title>
@@ -6,6 +7,17 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 	
     <style>
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .right {
+            float: right;
+        }
+
         body {
             background: #f8f9fa;
             font-family: system-ui;
@@ -134,9 +146,24 @@
   </head>
 
   <body>
-    
+    <div class="top-bar">
+        <a href="{% url 'wishlist' %}">
+            <img src="{% static 'w.png' %}" width="40" alt="img : W">
+        </a>
+        <!-- <button href="#">
+            W
+        </button> -->
+
+        <a href="/bdtheque">
+            <img src="{% static 'home.png' %}" width="40" alt="img : W">
+        </a>
+
+        <a href="/bdtheque">
+            <img src="{% static 'add.png' %}" width="40" alt="img : W">
+        </a>
+    </div>
+
     {% block content %}
-    
 	{% endblock %}
 
   </body>

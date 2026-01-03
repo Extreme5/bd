@@ -5,6 +5,8 @@ from django.conf import settings
 from django.contrib import messages
 import sqlite3
 from django import forms
+import os
+from .models import Winshlist
 
 
 class NameForm(forms.Form):
@@ -22,6 +24,7 @@ def get_series_from_db():
     """Retourne un dictionnaire {serie: [tomes...]} basé sur la table tomes."""
     db_path = get_sqlite_path()
     series = {}
+
     try:
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
@@ -32,13 +35,14 @@ def get_series_from_db():
 
         #trier par ordre alphabétique
         sorted_keys = sorted(series.keys())
-        series = {k: series[k] for k in sorted_keys}
-        
+        series = {k: series[k] for k in sorted_keys} 
+
     finally:
         try:
             conn.close()
         except Exception:
             pass
+
     return series
 
 def home(request):
@@ -47,6 +51,7 @@ def home(request):
     # fallback minimal si la table est vide
     if not series:
         series = {}
+
     # handle classic POST add (server-side) -> redirect with flag to show popup
     if request.method == 'POST':
         new_serie = request.POST.get('serie_name')
@@ -64,13 +69,39 @@ def home(request):
                     added = True
                 conn.commit()
             finally:
-                conn.close()
+                try:
+                    conn.close()
+                except Exception:
+                    pass
             if added:
-                # use Django messages to show a one-time popup after redirect
                 messages.success(request, '✔ Série ajoutée !')
                 return HttpResponseRedirect(request.path)
+            else:
+                messages.success(request, 'Série déjà existante !')
+                return HttpResponseRedirect(request.path)
 
-    return render(request, 'home.html', {"series": series, "total_albums": sum(len(tomes) for tomes in series.values())})
+    # Calcul du total d'albums : compter les lignes dans `tomes` où `tome` n'est pas NULL
+    total_albums = 0
+    db_path = get_sqlite_path()
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        row = cur.execute("SELECT COUNT(*) FROM tomes WHERE tome IS NOT NULL").fetchone()
+        if row and row[0] is not None:
+            total_albums = int(row[0])
+    except Exception:
+        # fallback : calcul approximatif depuis la structure chargée en mémoire
+        try:
+            total_albums = sum(max(0, len(tomes) - 1) for tomes in series.values())
+        except Exception:
+            total_albums = 0
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+    return render(request, 'home.html', {"series": series, "total_albums": total_albums})
 
 
 def add_serie(request):
@@ -103,6 +134,45 @@ def serie(request, serie):
         conn.close()
 
     return render(request, 'serie.html', {"serie": serie, "tomes": tomes, "tomes_range": tomes_range})
+
+def wishlist(request):
+    db_path = get_sqlite_path()
+    content = ''
+
+    if request.method == 'POST':
+        content = request.POST.get('content', '')
+        try:
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            # tenter de mettre à jour la ligne existante
+            cur.execute("UPDATE wishlist SET wishlist = ?", (content,))
+            if cur.rowcount == 0:
+                # si aucune ligne mise à jour, insérer
+                cur.execute("INSERT INTO wishlist (wishlist) VALUES (?)", (content,))
+            conn.commit()
+            messages.success(request, '✔ Contenu sauvegardé')
+        except Exception:
+            messages.error(request, 'Erreur lors de la sauvegarde')
+        finally:
+            conn.close()
+        return HttpResponseRedirect(request.path)
+
+    # GET : lire la valeur si elle existe
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        row = cur.execute("SELECT wishlist FROM wishlist LIMIT 1").fetchone()
+        if row:
+            content = row[0] or ''
+    except Exception:
+        content = ''
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+    return render(request, 'wishlist.html', {'content': content})
 
 
 def delete_serie(request, serie):
