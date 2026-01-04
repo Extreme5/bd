@@ -11,4 +11,5 @@ urlpatterns = [
     path('delete_serie/<str:serie>/', delete_serie, name='delete_serie'),
     path('add_tome/<str:serie>/', add_tome, name='add_tome'),
     path('wishlist/', wishlist, name='wishlist'),
+    path('add/', add, name='add'),
 ]

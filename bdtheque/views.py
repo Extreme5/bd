@@ -46,39 +46,10 @@ def get_series_from_db():
     return series
 
 def home(request):
-    added = False
     series = get_series_from_db()
     # fallback minimal si la table est vide
     if not series:
         series = {}
-
-    # handle classic POST add (server-side) -> redirect with flag to show popup
-    if request.method == 'POST':
-        new_serie = request.POST.get('serie_name')
-        tot = request.POST.get('total')
-        if new_serie:
-            db_path = get_sqlite_path()
-            try:
-                conn = sqlite3.connect(db_path)
-                cur = conn.cursor()
-                cur.execute("SELECT 1 FROM tomes WHERE serie = ?", (new_serie,))
-                exists = cur.fetchone()
-                if not exists:
-                    cur.execute("INSERT INTO tomes (serie) VALUES (?)", (new_serie,))
-                    cur.execute("INSERT INTO totaux (serie, total) VALUES (?, ?)", (new_serie, tot))
-                    added = True
-                conn.commit()
-            finally:
-                try:
-                    conn.close()
-                except Exception:
-                    pass
-            if added:
-                messages.success(request, '✔ Série ajoutée !')
-                return HttpResponseRedirect(request.path)
-            else:
-                messages.success(request, 'Série déjà existante !')
-                return HttpResponseRedirect(request.path)
 
     # Calcul du total d'albums : compter les lignes dans `tomes` où `tome` n'est pas NULL
     total_albums = 0
@@ -247,3 +218,36 @@ def toggle_tome(request, serie, num):
         except Exception:
             pass
     return HttpResponse(status=204)
+
+def add(request):
+
+    added = False
+    # handle classic POST add (server-side) -> redirect with flag to show popup
+    if request.method == 'POST':
+        new_serie = request.POST.get('serie_name')
+        tot = request.POST.get('total')
+        if new_serie:
+            db_path = get_sqlite_path()
+            try:
+                conn = sqlite3.connect(db_path)
+                cur = conn.cursor()
+                cur.execute("SELECT 1 FROM tomes WHERE serie = ?", (new_serie,))
+                exists = cur.fetchone()
+                if not exists:
+                    cur.execute("INSERT INTO tomes (serie) VALUES (?)", (new_serie,))
+                    cur.execute("INSERT INTO totaux (serie, total) VALUES (?, ?)", (new_serie, tot))
+                    added = True
+                conn.commit()
+            finally:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            if added:
+                messages.success(request, '✔ Série ajoutée !')
+                return HttpResponseRedirect(request.path)
+            else:
+                messages.success(request, 'Série déjà existante !')
+                return HttpResponseRedirect(request.path)
+
+    return render(request, 'add.html')
