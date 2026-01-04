@@ -19,4 +19,24 @@
 </div>
 </center>
 
+<script>
+  // popup helper
+  function showPopup(message) {
+    const el = document.createElement('div');
+    el.className = 'mini-popup';
+    el.textContent = message;
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; }, 1500);
+    setTimeout(() => el.remove(), 2200);
+  }
+  // show messages (one-time) as popups
+  document.addEventListener('DOMContentLoaded', () => {
+    {% if messages %}
+      {% for message in messages %}
+        showPopup("{{ message|escapejs }}");
+      {% endfor %}
+    {% endif %}
+  });
+</script>
+
 {% endblock %}
