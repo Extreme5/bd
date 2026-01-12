@@ -72,7 +72,7 @@ def home(request):
         except Exception:
             pass
 
-    return render(request, 'home.html', {"series": series, "total_albums": total_albums})
+    return render(request, 'home.html', {"series": series, "total_albums": total_albums+12})
 
 
 def add_serie(request):
