@@ -22,7 +22,11 @@
       <button class="delete-serie-btn" data-serie="{{ serie }}" title="Supprimer la série">🗑️</button>
       <div class="card-body text-center">
         <h5 class="card-title">{{ serie }}</h5>
+        {% if tomes|length|add:"-1" == 1 %}
+        <h6 class="card-subtitle mb-2 text-muted">{{ tomes|length|add:"-1" }} album</h6>
+        {% else %}
         <h6 class="card-subtitle mb-2 text-muted">{{ tomes|length|add:"-1" }} albums</h6>
+        {% endif %}
         <a href="{% url 'serie' serie %}" class="btn btn-outline-primary rounded-pill px-4">
           Voir les albums
         </a>
@@ -66,7 +70,7 @@
       if (!confirm(`Supprimer la série "${serie}" ?`)) return;
       const csrftoken = getCookie('csrftoken');
       try {
-        const res = await fetch(`/bdtheque/delete_serie/${encodeURIComponent(serie)}/`, {
+        const res = await fetch(`/delete_serie/${encodeURIComponent(serie)}/`, {
           method: 'POST',
           headers: { 'X-CSRFToken': csrftoken }
         });

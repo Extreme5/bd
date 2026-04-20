@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
@@ -245,9 +245,11 @@ def add(request):
                     pass
             if added:
                 messages.success(request, '✔ Série ajoutée !')
-                return HttpResponseRedirect(request.path)
+                return redirect('home')
             else:
-                messages.success(request, 'Série déjà existante !')
-                return HttpResponseRedirect(request.path)
+                # Ne pas rediriger si la série existe déjà : rester sur la page d'ajout
+                # et marquer le message avec un tag 'long' pour affichage prolongé côté JS
+                messages.success(request, 'Série déjà existante !', extra_tags='long')
+                # on laisse tomber à la fin de la vue pour rendre 'add.html'
 
     return render(request, 'add.html')

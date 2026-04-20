@@ -21,19 +21,26 @@
 
 <script>
   // popup helper
-  function showPopup(message) {
+  function showPopup(message, duration = 1800) {
     const el = document.createElement('div');
     el.className = 'mini-popup';
     el.textContent = message;
     document.body.appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; }, 1500);
-    setTimeout(() => el.remove(), 2200);
+    // commencer la disparition après `duration` ms
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; }, duration);
+    setTimeout(() => el.remove(), duration + 400);
   }
   // show messages (one-time) as popups
   document.addEventListener('DOMContentLoaded', () => {
     {% if messages %}
       {% for message in messages %}
-        showPopup("{{ message|escapejs }}");
+        (function() {
+          const text = "{{ message|escapejs }}";
+          const tags = "{{ message.tags|escapejs }}"; // contient les extra tags (ex: "success long")
+          const isLong = tags.split(' ').indexOf('long') !== -1;
+          const duration = isLong ? 5000 : 1800; // 5s pour 'long', sinon ~1.8s
+          showPopup(text, duration);
+        })();
       {% endfor %}
     {% endif %}
   });

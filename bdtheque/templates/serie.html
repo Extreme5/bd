@@ -54,7 +54,7 @@
         const num = el.dataset.num;
         el.classList.toggle('active');
         try {
-          await fetch(`/bdtheque/toggle_tome/{{ serie }}/${num}`, {
+          await fetch(`/toggle_tome/{{ serie }}/${num}`, {
             method: 'POST',
             headers: { 'X-CSRFToken': getCookie('csrftoken') }
           });
@@ -74,7 +74,7 @@
     document.getElementById('add-tome').addEventListener('click', async () => {
       const csrftoken = getCookie('csrftoken');
       try {
-        const res = await fetch(`/bdtheque/add_tome/{{ serie }}/`, {
+        const res = await fetch(`/add_tome/{{ serie }}/`, {
           method: 'POST',
           headers: { 'X-CSRFToken': csrftoken }
         });
